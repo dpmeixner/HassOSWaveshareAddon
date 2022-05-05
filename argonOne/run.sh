@@ -75,7 +75,7 @@ action() {
   fanPercentHex=$(printf '%x' "${fanPercent}")
   printf '%(%Y-%m-%d_%H:%M:%S)T'
   echo ": ${cpuTemp}${CorF} - Level ${fanLevel} - Fan ${fanPercent}% (${fanMode})";
-  i2cset -y 1 0x2f 0x30 "${fanPercentHex}"
+  i2cset -y 10 0x2f 0x30 "${fanPercentHex}"
   returnValue=${?}
   test "${createEntity}" == "true" && fanSpeedReport "${fanPercent}" "${fanLevel}" "${fanMode}" "${cpuTemp}" "${CorF}" &
   return ${returnValue}
@@ -99,15 +99,15 @@ fanLevel=-1;
 previousFanLevel=-1;
 
 #Trap exits and set fan to 100% like a safe mode.
-trap 'echo "Failed ${LINENO}: $BASH_COMMAND";i2cset -y 1 0x2f 0xff;previousFanLevel=-1;fanLevel=-1; echo Safe Mode Activated!;' ERR EXIT INT TERM
+trap 'echo "Failed ${LINENO}: $BASH_COMMAND";i2cset -y 10 0x2f 0xff;previousFanLevel=-1;fanLevel=-1; echo Safe Mode Activated!;' ERR EXIT INT TERM
 
-if [ ! -e /dev/i2c-1 ]; then
+if [ ! -e /dev/i2c-10 ]; then
   echo "Cannot find I2C port.  You must enable I2C for this add-on to operate properly";
   exit 1;
 fi
 
-echo "Detecting Layout of i2c, we expect to see \"sf\" here."
-i2cDetect=$(i2cdetect -y 1);
+echo "Detecting Layout of i2c, we expect to see \"2f\" here."
+i2cDetect=$(i2cdetect -y 10);
 echo -e "${i2cDetect}"
 
 if [[ "$i2cDetect" != *"2f"* ]]; then 
